@@ -1,0 +1,29 @@
+name: On PR Merged
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  run-after-merge:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show merged PR context
+        run: |
+          echo "PR #${{ github.event.pull_request.number }} was merged into ${{ github.event.pull_request.base.ref }}"
+          echo "Merge commit SHA: ${{ github.event.pull_request.merge_commit_sha }}"
+
+      - name: Run RQ2 analysis script
+        run: python rq2_cross_sectional_analysis.py
+
+      - name: Upload analysis outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: rq2-analysis-outputs
+          path: |
+            RQ2_cross_sectional_report.md
+            artifacts/rq2_top_associations.svg
